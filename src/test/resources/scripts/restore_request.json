@@ -1,15 +1,15 @@
 {
   "bigQuery": {
-    "projectId": "bigquery-hosting-prod",
+    "projectId": "target-bigquery-host",
     "datasetsToRestore": [
       "ecommerce_data", "analytics_dataset"
     ]
   },
   "restoreStorage": {
     "gcsOptions": {
-      "uri": "gs://automated-bigquery-backup-bucket",
+      "uri": "gs://automated-bq-backup-restore-bucket",
       "backupTimestamp": "20250325_070424",
-      "projectIdOfBackup": "bigquery-hosting-prod",
+      "projectIdOfBackup": "target-bigquery-host",
       "importOptions": {
         "restoreRegion": "europe-west3",
         "format": "CSV",

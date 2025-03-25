@@ -1,6 +1,6 @@
 {
   "bigQuery": {
-    "projectId": "bigquery-hosting-prod",
+    "projectId": "target-bigquery-host",
     "tablesToBackup": [
       {
         "datasetName": "ecommerce_data",
@@ -17,7 +17,7 @@
   },
   "backupStorage": {
     "gcsOptions": {
-      "uri": "gs://automated-bigquery-backup-bucket",
+      "uri": "gs://automated-bq-backup-restore-bucket",
       "exportOptions": {
         "format": "CSV",
         "overwrite": true,
