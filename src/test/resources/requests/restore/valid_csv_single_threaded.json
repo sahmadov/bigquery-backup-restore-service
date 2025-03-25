@@ -1,0 +1,26 @@
+{
+  "bigQuery": {
+    "projectId": "my-restore-project",
+    "datasetsToRestore": [
+      "sales_data"
+    ]
+  },
+  "restoreStorage": {
+    "gcsOptions": {
+      "uri": "gs://my-bucket",
+      "backupTimestamp": "20240101_120000",
+      "projectIdOfBackup": "source-project-123",
+      "importOptions": {
+        "restoreRegion": "europe-west3",
+        "format": "CSV",
+        "header": true,
+        "fieldDelimiter": ",",
+        "ignoreUnknownValues": true,
+        "maxBadRecords": 0,
+        "writeDisposition": "WRITE_TRUNCATE",
+        "threadPoolSize": 1,
+        "threadQueueCapacity": null
+      }
+    }
+  }
+}

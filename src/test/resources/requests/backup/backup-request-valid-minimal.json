@@ -1,0 +1,14 @@
+{
+  "bigQuery": {
+    "projectId": "my-gcp-project"
+  },
+  "backupStorage": {
+    "gcsOptions": {
+      "uri": "gs://my-backup-bucket/minimal-example",
+      "exportOptions": {
+        "format": "AVRO",
+        "overwrite": true
+      }
+    }
+  }
+}

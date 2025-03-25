@@ -1,0 +1,27 @@
+{
+  "bigQuery": {
+    "projectId": "my-restore-project",
+    "datasetsToRestore": [
+      "user_logs",
+      "purchase_history"
+    ]
+  },
+  "restoreStorage": {
+    "gcsOptions": {
+      "uri": "gs://my-bucket",
+      "backupTimestamp": "20240101_130000",
+      "projectIdOfBackup": "source-project-456",
+      "importOptions": {
+        "restoreRegion": "europe-west3",
+        "format": "AVRO",
+        "header": true,
+        "fieldDelimiter": "|",
+        "ignoreUnknownValues": false,
+        "maxBadRecords": 5,
+        "writeDisposition": "WRITE_TRUNCATE",
+        "threadPoolSize": 5,
+        "threadQueueCapacity": 50
+      }
+    }
+  }
+}

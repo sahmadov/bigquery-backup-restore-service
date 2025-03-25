@@ -1,0 +1,32 @@
+{
+  "bigQuery": {
+    "projectId": "my-gcp-project",
+    "tablesToBackup": [
+      {
+        "datasetName": "ecommerce_data",
+        "tables": [
+          "orders",
+          "sales_2024_01"
+        ]
+      }
+    ]
+  },
+  "backupStorage": {
+    "gcsOptions": {
+      "uri": "gs://my-backup-bucket/csv-threaded",
+      "exportOptions": {
+        "format": "CSV",
+        "overwrite": true,
+        "header": true,
+        "compression": "GZIP",
+        "fieldDelimiter": ",",
+        "threadPoolSize": 4,
+        "threadQueueCapacity": 10
+      }
+    }
+  },
+  "backupTime": {
+    "localDateTime": "2024-12-31T23:59:00",
+    "timezone": "America/Los_Angeles"
+  }
+}

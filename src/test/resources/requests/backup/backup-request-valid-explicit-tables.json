@@ -1,0 +1,27 @@
+{
+  "bigQuery": {
+    "projectId": "my-gcp-project",
+    "tablesToBackup": [
+      {
+        "datasetName": "analytics_dataset",
+        "tables": [
+          "product_metrics",
+          "customer_segmentation"
+        ]
+      }
+    ]
+  },
+  "backupStorage": {
+    "gcsOptions": {
+      "uri": "gs://my-backup-bucket/explicit-tables",
+      "exportOptions": {
+        "format": "AVRO",
+        "overwrite": false
+      }
+    }
+  },
+  "backupTime": {
+    "localDateTime": "2024-05-01T12:30:00",
+    "timezone": "UTC"
+  }
+}

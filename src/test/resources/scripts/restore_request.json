@@ -1,0 +1,26 @@
+{
+  "bigQuery": {
+    "projectId": "bigquery-hosting-prod",
+    "datasetsToRestore": [
+      "ecommerce_data", "analytics_dataset"
+    ]
+  },
+  "restoreStorage": {
+    "gcsOptions": {
+      "uri": "gs://automated-bigquery-backup-bucket",
+      "backupTimestamp": "20250325_070424",
+      "projectIdOfBackup": "bigquery-hosting-prod",
+      "importOptions": {
+        "restoreRegion": "europe-west3",
+        "format": "CSV",
+        "header": true,
+        "fieldDelimiter": ",",
+        "ignoreUnknownValues": true,
+        "maxBadRecords": 0,
+        "writeDisposition": "WRITE_TRUNCATE",
+        "threadPoolSize": 5,
+        "threadQueueCapacity": 15
+      }
+    }
+  }
+}

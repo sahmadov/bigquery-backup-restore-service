@@ -1,0 +1,32 @@
+{
+  "bigQuery": {
+    "projectId": "bigquery-hosting-prod",
+    "tablesToBackup": [
+      {
+        "datasetName": "ecommerce_data",
+        "tables": [
+          "customers",
+          "orders"
+        ],
+        "tableFilter": "sales_*"
+      },
+      {
+        "datasetName": "analytics_dataset"
+      }
+    ]
+  },
+  "backupStorage": {
+    "gcsOptions": {
+      "uri": "gs://automated-bigquery-backup-bucket",
+      "exportOptions": {
+        "format": "CSV",
+        "overwrite": true,
+        "compression": "GZIP",
+        "header": true,
+        "fieldDelimiter": ",",
+        "threadPoolSize": 4,
+        "threadQueueCapacity": 10
+      }
+    }
+  }
+}
