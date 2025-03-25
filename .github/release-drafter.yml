@@ -1,0 +1,103 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+template: |
+  # What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: '🧰 Maintenance'
+    labels:
+      - 'chore'
+      - 'maintenance'
+  - title: '📝 Documentation'
+    labels:
+      - 'documentation'
+      - 'docs'
+
+autolabeler:
+  - label: 'major'
+    branch:
+      - '/\b(major)\/.+/'
+      - '/\b(breaking)\/.+/'
+    title:
+      - '/\b(major|breaking)\b/i'
+
+  - label: 'feature'
+    branch:
+      - '/\b(feature)\/.+/'
+      - '/\b(feat)\/.+/'
+      - '/\b(enhancement)\/.+/'
+    title:
+      - '/\b(feature|feat|add|implement|create|new)\b/i'
+
+  - label: 'bug'
+    branch:
+      - '/\b(fix)\/.+/'
+      - '/\b(bugfix)\/.+/'
+      - '/\b(hotfix)\/.+/'
+      - '/\b(bug)\/.+/'
+    title:
+      - '/\b(fix|resolve|close|bug|hotfix)\b/i'
+
+  - label: 'documentation'
+    branch:
+      - '/\b(docs)\/.+/'
+      - '/\b(documentation)\/.+/'
+    title:
+      - '/\b(docs|documentation|improve docs|update docs)\b/i'
+    files:
+      - 'README.md'
+      - 'docs/**/*'
+
+  - label: 'chore'
+    branch:
+      - '/\b(chore)\/.+/'
+      - '/\b(maintenance)\/.+/'
+      - '/\b(tooling)\/.+/'
+      - '/\b(build)\/.+/'
+      - '/\b(ci)\/.+/'
+    title:
+      - '/\b(chore|build|ci|deps|tooling|maintenance)\b/i'
+    files:
+      - '.github/**/*'
+      - 'pom.xml'
+      - 'Dockerfile'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking'
+  minor:
+    labels:
+      - 'minor'
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'patch'
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+      - 'maintenance'
+      - 'docs'
+      - 'documentation'
+      - 'dependencies'
+  default: patch
+
+exclude-labels:
+  - 'skip-changelog'

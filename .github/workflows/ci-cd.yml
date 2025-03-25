@@ -1,0 +1,235 @@
+name: CI/CD Pipeline
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/**'
+      - 'src/**'
+      - 'Dockerfile'
+      - 'pom.xml'
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
+  push:
+    branches: [main]
+    paths:
+      - '.github/**'
+      - 'src/**'
+      - 'Dockerfile'
+      - 'pom.xml'
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+  ARTIFACT_REGISTRY_LOCATION: '${{ vars.ARTIFACT_REGISTRY_LOCATION }}'
+  GCP_PROJECT_ID: '${{ vars.GCP_PROJECT_ID }}'
+  ARTIFACT_REPOSITORY: '${{ vars.ARTIFACT_REPOSITORY }}'
+  IMAGE_NAME: 'bigquery-backup-restore-service'
+
+jobs:
+  label-prs:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+          disable-releaser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: Unit Tests
+    if: github.event_name != 'pull_request_target'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Run unit tests
+        run: mvn verify -DexcludedGroups="com.bigquery.app.integration.*"
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    name: Integration Tests
+    if: github.event_name != 'pull_request_target'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Run integration tests
+        run: mvn verify -Dtest="com.bigquery.app.integration.**"
+
+  build-and-deploy:
+    needs: [unit-tests, integration-tests]
+    if: github.event_name != 'pull_request_target'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Get next version
+        id: release-drafter
+        if: github.event_name != 'pull_request'
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-name: release-drafter.yml
+          disable-autolabeler: false
+
+      - name: Debug release-drafter outputs
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "Tag name: ${{ steps.release-drafter.outputs.tag_name }}"
+          echo "Version: ${{ steps.release-drafter.outputs.version }}"
+          echo "Name: ${{ steps.release-drafter.outputs.name }}"
+          echo "Body: ${{ steps.release-drafter.outputs.body }}"
+
+      - name: Get commit hash
+        id: get-commit-hash
+        run: |
+          echo "commit-hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set version output
+        id: version-output
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, use commit hash as version
+            NEXT_VERSION="${{ steps.get-commit-hash.outputs.commit-hash }}"
+            echo "Using commit hash for PR: $NEXT_VERSION"
+          else
+            # For non-PRs (main branch), use release-drafter version
+            RELEASE_VERSION="${{ steps.release-drafter.outputs.tag_name }}"
+          
+            # If tag_name is empty, try steps.release-drafter.outputs.version
+            if [ -z "$RELEASE_VERSION" ]; then
+              RELEASE_VERSION="${{ steps.release-drafter.outputs.version }}"
+              echo "Using version from release-drafter.outputs.version: $RELEASE_VERSION"
+            fi
+          
+            # If it starts with v, remove it
+            if [[ "$RELEASE_VERSION" == v* ]]; then
+              RELEASE_VERSION="${RELEASE_VERSION#v}"
+            fi
+          
+            NEXT_VERSION="$RELEASE_VERSION"
+            echo "Final determined version: $NEXT_VERSION"
+          fi
+          
+          echo "next-version=$NEXT_VERSION" >> $GITHUB_ENV
+
+      - name: Set image tag
+        id: set-image-tag
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            PR_NUMBER="${{ github.event.number }}"
+            IMAGE_TAG="${{ env.next-version }}-PR-${PR_NUMBER}"
+          else
+            IMAGE_TAG="${{ env.next-version }}"
+          fi
+          
+          echo "image-tag=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image references
+        id: image-ref
+        run: |
+          GCP_IMAGE_REF="${{ env.ARTIFACT_REGISTRY_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ env.IMAGE_NAME }}"
+          GHCR_IMAGE_REF="ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}"
+          
+          echo "gcp-image=$GCP_IMAGE_REF" >> $GITHUB_ENV
+          echo "ghcr-image=$GHCR_IMAGE_REF" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.gcp-image }}:${{ env.image-tag }} .
+
+      - name: Tag images for both registries
+        run: |
+          # Tag for GitHub Container Registry
+          docker tag ${{ env.gcp-image }}:${{ env.image-tag }} ${{ env.ghcr-image }}:${{ env.image-tag }}
+
+      - name: Push to GCP Artifact Registry
+        run: |
+          docker push ${{ env.gcp-image }}:${{ env.image-tag }}
+
+      - name: Push to GitHub Container Registry
+        run: |
+          docker push ${{ env.ghcr-image }}:${{ env.image-tag }}
+
+      - name: Tag as latest and push to both registries
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: |
+          # Tag and push latest for GCP
+          docker tag ${{ env.gcp-image }}:${{ env.image-tag }} ${{ env.gcp-image }}:latest
+          docker push ${{ env.gcp-image }}:latest
+          
+          # Tag and push latest for GitHub
+          docker tag ${{ env.gcp-image }}:${{ env.image-tag }} ${{ env.ghcr-image }}:latest
+          docker push ${{ env.ghcr-image }}:latest
+
+      - name: Publish Release
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
