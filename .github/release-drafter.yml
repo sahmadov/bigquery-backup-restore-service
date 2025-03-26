@@ -74,6 +74,9 @@ autolabeler:
       - '.github/**/*'
       - 'pom.xml'
       - 'Dockerfile'
+  - label: 'infra'
+    files:
+      - 'infrastructure/terraform/**/*'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 
