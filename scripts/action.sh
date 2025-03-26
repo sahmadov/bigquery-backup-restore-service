@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define endpoints
-CLOUD_RUN_BASE_URL="https://bigquery-backup-restore-service-837300062217.europe-west3.run.app"
+CLOUD_RUN_BASE_URL="https://bigquery-backup-restore-service-590805821164.europe-west3.run.app"
 BACKUP_ENDPOINT="$CLOUD_RUN_BASE_URL/api/v1/backup"
 RESTORE_ENDPOINT="$CLOUD_RUN_BASE_URL/api/v1/restore"
 LOGGERS_ENDPOINT="$CLOUD_RUN_BASE_URL/actuator/loggers/com.bigquery.app"

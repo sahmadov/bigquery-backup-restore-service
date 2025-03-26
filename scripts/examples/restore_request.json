@@ -8,7 +8,7 @@
   "restoreStorage": {
     "gcsOptions": {
       "uri": "gs://automated-bq-backup-restore-bucket",
-      "backupTimestamp": "20250325_070424",
+      "backupTimestamp": "20250326_175205",
       "projectIdOfBackup": "target-bigquery-host",
       "importOptions": {
         "restoreRegion": "europe-west3",
