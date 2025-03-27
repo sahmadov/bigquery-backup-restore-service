@@ -18,7 +18,7 @@ Open source project for backing up and restoring BigQuery datasets and tables.
 
 The BigQuery Backup and Restore solution provides automated backup and recovery capabilities for your BigQuery datasets and tables.
 
-![BigQuery Backup and Restore Architecture](doc/bigquery backup and restore diagram.png)
+![BigQuery Backup and Restore Architecture](doc/bigquery-backup-and-restore-diagram.png)
 
 ### How It Works
 
