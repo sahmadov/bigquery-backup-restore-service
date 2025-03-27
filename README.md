@@ -184,6 +184,8 @@ docker push europe-west3-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery
 
 #### Step 4: Test the Service
 
+0. Before starting make sure you have created artifact registry for pushing images and cloud storage for saving backups. 
+
 1. Update the request files with your specific values:
    ```bash
    # Edit backup request file to match your environment
