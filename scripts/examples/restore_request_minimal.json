@@ -1,0 +1,20 @@
+{
+  "bigQuery": {
+    "projectId": "target-bigquery-host",
+    "datasetsToRestore": [
+      "ecommerce_data", "analytics_dataset"
+    ]
+  },
+  "restoreStorage": {
+    "gcsOptions": {
+      "uri": "gs://open-source-bq-backup-restore-bucket",
+      "backupTimestamp": "20250327_075515",
+      "projectIdOfBackup": "target-bigquery-host",
+      "importOptions": {
+        "restoreRegion": "europe-west3",
+        "format": "AVRO",
+        "writeDisposition": "WRITE_TRUNCATE"
+      }
+    }
+  }
+}

@@ -105,7 +105,7 @@ Example request:
   }
 }
 ```
-## Deployment Options
+## Deployment Guide
 
 ### Option 1: Using the Deployment Script
 
@@ -119,43 +119,101 @@ For more details, see the [scripts/README.md](scripts/README.md) file.
 
 ### Option 2: Manual Docker Image Deployment
 
-If you prefer to manually deploy the Docker image, you can use these commands:
+If you prefer to manually deploy the Docker image, follow these detailed steps:
 
-1. Authenticate with Google Cloud:
+#### Step 1: Google Cloud Authentication
+
 ```bash
+# Login to your Google Cloud account
 gcloud auth login
+
+# Set your active project
 gcloud config set project YOUR_PROJECT_ID
+
+# Configure Docker to use Google Cloud credentials
+gcloud auth configure-docker europe-west3-docker.pkg.dev
 ```
 
-2. Configure Docker to use gcloud credentials for your Artifact Registry:
+#### Step 2: Pull and Push the Image
+
+Choose one of the following options depending on which registry you want to pull from:
+
+**Option A: Pull from Google Artifact Registry**
 ```bash
-gcloud auth configure-docker REGION-docker.pkg.dev
+# Pull the image from our GCP Artifact Registry
+docker pull europe-west3-docker.pkg.dev/bigquery-automation-454819/bigquery-service-repo/bigquery-backup-restore-service:latest
+
+# Tag the image for your own registry
+docker tag europe-west3-docker.pkg.dev/bigquery-automation-454819/bigquery-service-repo/bigquery-backup-restore-service:latest \
+    europe-west3-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
+
+# Push to your registry
+docker push europe-west3-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
 ```
 
-3. Pull the image from one of our public registries:
+**Option B: Pull from GitHub Packages**
 ```bash
-# From GitHub Packages
+# Create a GitHub Personal Access Token with read:packages scope
+# Then login to GitHub Container Registry
+echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+
+# Pull the image from GitHub Packages
 docker pull ghcr.io/sahmadov/bigquery-backup-restore-service:latest
 
-# OR from Google Artifact Registry
-docker pull europe-west3-docker.pkg.dev/bigquery-automation-454819/bigquery-service-repo/bigquery-backup-restore-service:latest
-```
-
-4. Tag the image for your Artifact Registry:
-```bash
+# Tag the image for your own registry
 docker tag ghcr.io/sahmadov/bigquery-backup-restore-service:latest \
-    REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
+    europe-west3-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
+
+# Push to your registry
+docker push europe-west3-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
 ```
 
-5. Push the image to your Artifact Registry:
-```bash
-docker push REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
-```
+#### Step 3: Deploy to Cloud Run
 
-Remember to replace:
-- `REGION` with your GCP region (e.g., europe-west3)
+1. Go to the Cloud Run service in your GCP Console
+2. Click "Create Service"
+3. Choose the option to "Deploy one revision from an existing container image"
+4. Select the container image you pushed to your Artifact Registry
+5. Configure the service settings:
+    - Set memory to at least 1GiB
+    - Set CPU to at least 1
+    - Specify a service account with the following permissions:
+        - BigQuery Data Editor
+        - BigQuery User
+        - Storage Admin roles
+
+#### Step 4: Test the Service
+
+1. Update the request files with your specific values:
+   ```bash
+   # Edit backup request file to match your environment
+   nano scripts/examples/backup_request.json
+   ```
+
+2. Update the Cloud Run URL in the action script:
+   ```bash
+   # Edit the CLOUD_RUN_BASE_URL value to point to your deployed service
+   nano scripts/action.sh
+   ```
+
+3. Run your first backup:
+   ```bash
+   ./scripts/action.sh backup ./scripts/examples/backup_request.json DEBUG
+   ```
+
+4. Run a restore operation:
+   ```bash
+   # Edit restore request file to use your backup details
+   nano scripts/examples/restore_request.json
+   
+   # Run the restore
+   ./scripts/action.sh restore ./scripts/examples/restore_request.json DEBUG
+   ```
+
+Remember to replace placeholder values:
 - `YOUR_PROJECT_ID` with your GCP project ID
 - `YOUR_REPOSITORY` with your Artifact Registry repository name
+- `YOUR_GITHUB_USERNAME` with your GitHub username if using GitHub Packages
 
 ## Contributing
 

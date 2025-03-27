@@ -1,0 +1,14 @@
+{
+  "bigQuery": {
+    "projectId": "target-bigquery-host"
+  },
+  "backupStorage": {
+    "gcsOptions": {
+      "uri": "gs://open-source-bq-backup-restore-bucket",
+      "exportOptions": {
+        "format": "AVRO",
+        "overwrite": true
+      }
+    }
+  }
+}
