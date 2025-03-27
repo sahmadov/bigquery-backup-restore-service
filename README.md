@@ -105,6 +105,57 @@ Example request:
   }
 }
 ```
+## Deployment Options
+
+### Option 1: Using the Deployment Script
+
+The simplest way to deploy the service is using our deployment script:
+
+```bash
+./scripts/deploy/deploy-image.sh --project-id YOUR_GCP_PROJECT --registry YOUR_REGISTRY_NAME
+```
+
+For more details, see the [scripts/README.md](scripts/README.md) file.
+
+### Option 2: Manual Docker Image Deployment
+
+If you prefer to manually deploy the Docker image, you can use these commands:
+
+1. Authenticate with Google Cloud:
+```bash
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+```
+
+2. Configure Docker to use gcloud credentials for your Artifact Registry:
+```bash
+gcloud auth configure-docker REGION-docker.pkg.dev
+```
+
+3. Pull the image from one of our public registries:
+```bash
+# From GitHub Packages
+docker pull ghcr.io/sahmadov/bigquery-backup-restore-service:latest
+
+# OR from Google Artifact Registry
+docker pull europe-west3-docker.pkg.dev/bigquery-automation-454819/bigquery-service-repo/bigquery-backup-restore-service:latest
+```
+
+4. Tag the image for your Artifact Registry:
+```bash
+docker tag ghcr.io/sahmadov/bigquery-backup-restore-service:latest \
+    REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
+```
+
+5. Push the image to your Artifact Registry:
+```bash
+docker push REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/bigquery-backup-restore-service:latest
+```
+
+Remember to replace:
+- `REGION` with your GCP region (e.g., europe-west3)
+- `YOUR_PROJECT_ID` with your GCP project ID
+- `YOUR_REPOSITORY` with your Artifact Registry repository name
 
 ## Contributing
 
