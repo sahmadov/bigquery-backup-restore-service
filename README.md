@@ -1,40 +1,40 @@
-# BigQuery Backup&Restore Automation
-> An open-source, scalable, and multi-threaded solution that supports many formats for automating backups and restores of BigQuery datasets and tables.
+# BigQuery Backup and Restore Automation
+> An open source scalable and multi threaded solution that supports many formats for automating backups and restores of BigQuery datasets and tables
+
 
 [![CI/CD Pipeline](https://github.com/sahmadov/bigquery-backup-restore-service/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/sahmadov/bigquery-backup-restore-service/actions/workflows/ci-cd.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Coverage](https://img.shields.io/badge/coverage-75%25-green.svg)](https://github.com/sahmadov/bigquery-backup-restore-service)
 [![Docker Image](https://img.shields.io/badge/Docker-ghcr.io-blue?logo=docker)](https://github.com/sahmadov/bigquery-backup-restore-service/pkgs/container/bigquery-backup-restore-service)
 
-I built this open-source solution to automate BigQuery backups and restores. It handles multiple formats, supports threading for better performance, and scales well. You can backup entire datasets or specific tables, export to common formats like Avro, CSV, Parquet, or JSON, and restore data exactly when you need it.
-
+I built this open source solution to automate BigQuery backups and restores. It handles multiple formats, supports threading for better performance and scales well. You can backup entire datasets or specific tables export to common formats like Avro, CSV, Parquet or JSON and restore data exactly when you need it
 ## Architecture Overview
 
 ![BigQuery Backup and Restore Architecture](doc/bigquery-backup-and-restore-diagram.png)
 
 ### How It Works
 
-The components of the architecture I now utilize in order to build are end image is:
+The components of the architecture I am currently utilizing in order to build are our end image is:
 
-1. On a predetermined schedule, **Cloud Scheduler** initiates backup and restoration operations. Other triggering methods that you could have used are: Eventarc, Pub/Sub with push subscription, Workflows and many others. You might also prefer to start only once in a while from your localhost.
+1. On a predetermined schedule, **Cloud Scheduler** initiates backup and restoration operations. Other triggering methods that you could have used are: Eventarc, Pub/Sub with push subscription, Workflows and many others. You might also prefer to start only once in a while from your localhost
 
-2. The entire procedure is coordinated by **Backup/Restore Service** (Cloud Run, in my case):
-   - **Flow of Backup operation(1.x):**
-      - 1.1: Cloud Scheduler starts the backup procedure
-      - 1.2: Service prepares export of tables. Fun Fact, in Bigquery libs (as of today) there is no built-in support for exporting whole dataset only table is possibly (most probably, because there is no snapshot of dataset concept yet)  
-      - 1.3: Cloud Storage is where our target tables are being exported.
+2. The entire procedure is coordinated by **Backup/Restore Service** (Cloud Run in my case):
+   - **Flow of Backup operation 1.x**
+      - 1.1 Cloud Scheduler starts the backup procedure
+      - 1.2 Service prepares export of tables. Fun Fact, in Bigquery libs (as of today) there is no built-in support for exporting whole dataset only table is possibly (most probably, because there is no snapshot of dataset concept yet)  
+      - 1.3 Cloud Storage is where our target tables are being exported.
 
-   - **Flow of restore operation (2.x):**
-      - 2.1: Cloud Scheduler starts the restore procedure
-      - 2.2: Our Service obtains table/dataset data from Cloud Storage
-      - 2.3: Finally, Tables of target dataset are restored back to BigQuery. (it doesn't overwrite existing dataset instead creates new one with __restored_ prefix)
+   - **Flow of restore operation 2.x**
+      - 2.1 Cloud Scheduler starts the restore procedure
+      - 2.2 Our Service obtains table/dataset data from Cloud Storage
+      - 2.3 Finally, Tables of target dataset are restored back to BigQuery. (it doesn't overwrite existing dataset instead creates new one with __restored_ prefix)
 
 
-Depending on your needs, this containerized service can also be set up on different compute platforms like as Cloud Functions, GKE, or GCE. As a result, your architecture may change from the one above. Ultimately, all you need to operate on GCP is a Docker image - your architecture choice is optional.
+Depending on your needs, this containerized service can also be set up on different compute platforms like as cloud Functions, GKE or GCE. As a result your architecture may change from the one above. Ultimately all you need to operate on GCP is a docker image and your architecture choice is optional.
 
 ## **Why This Project Exists**
 
-Organizations that use BigQuery will often find themselves in a position where fundamental reliability features—multi-region deployments, cross-region replication, time travel, and auto-failover—are not enough. Certain regulatory requirements or organizational policies requires that backups must be stored completely outside of the Google Cloud ecosystem, such as on-prem or AWS or even Azure. That's exactly the issue this service attempts to address.
+Organizations that use BigQuery will often find themselves in a position where fundamental reliability features—multi-region deployments, cross region replication, time travel, and auto failover functionalities are not enough. Certain regulatory requirements or organizational policies requires that backups must be stored completely outside of the Google Cloud ecosystem such as on-prem or AWS or even Azure. Thats exactly the issue this service attempts to address.
 
 ### A Practical Solution
 
@@ -43,7 +43,7 @@ This project, which was initially created to satisfy tough regulatory requiremen
 * **Store** it in a portable format appropriate for on-premises systems or other cloud providers 
 * **Restore** it when necessary.
 
-After developing an in-house solution, I found that a number of other teams had developed the very same backups for their own compliance or data governance needs independently. To get everyone from not having to reinvent the wheel, I open-sourced it.
+After developing an in-house solution I found that a number of other teams had developed the very same backups for their own compliance or data governance needs independently. To get everyone from not having to reinvent the wheel I open-sourced it.
 
 ### Important Use Cases Beyond Compliance
 
@@ -52,16 +52,16 @@ After developing an in-house solution, I found that a number of other teams had 
 * **Long-Term Archival**: Keep inexpensive backups after BigQuery's time travel window has passed.
 
 ## How to Use
-Two sources can be used to obtain the application image, which is a typical Docker image:
+Two sources can be used to obtain the application image which is a typical Docker image:
 
-1. My publicly available Google Artifact Registry: europe-west3-docker.pkg.dev/bigquery-automation-454819/bigquery-service-repo/bigquery-backup-restore-service
+1. My publicly available Google Artifact registry: europe-west3-docker.pkg.dev/bigquery-automation-454819/bigquery-service-repo/bigquery-backup-restore-service
 2. or again publicly available GitHub's Docker registry: ghcr.io/sahmadov/bigquery-backup-restore-service
 
-To use the image, you must push it to your personal Google Artifact Registry after pulling it. But if you'd rather have a detailed guide, here's how to do it:
+To use the image you must push it to your personal Google Artifact Registry after pulling it. But if you'd rather have a detailed guide, here is how to do it:
 
 ### Prerequisites
 
-Before starting, ensure you have:
+Before starting, ensure you have
 1. Created your own Artifact Registry for pushing images. This is because you might anyway need to have image in your own gcp project.
 2. Create a Cloud Storage bucket for saving backups. This will be later used in your json http requests to tell our service where to save backups.
 
