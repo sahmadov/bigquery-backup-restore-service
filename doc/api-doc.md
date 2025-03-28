@@ -141,7 +141,7 @@ Service account of your GCP container runner (in my case cloud run) should have 
     - Tables matching the provided filter pattern or explicitly listed are included.
     - Only standard tables are backed up; views, materialized views, and external tables are excluded.
 3. **Snapshot Process**:
-    - For each eligible table, a snapshot is created in a dedicated snapshot dataset.
+    - For each eligible table, a snapshot is created in a dedicated snapshot dataset (table_snapshots_dataset).
     - Snapshots have a default expiration of 1 day.
     - Snapshots are curicial components, as the all tables in datasets are snapshoted on current date time or user specified time.
 4. **Export Process**:
