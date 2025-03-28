@@ -125,6 +125,13 @@ The service exposes two main REST endpoints:
 
 ## Business Logic
 
+### GCP Permissions
+
+Service account of your GCP container runner (in my case cloud run) should have this permissions/roles in target GCP project which is holding bigquery database:
+
+   - `roles/bigquery.dataEditor` (on project level or dataset level) and `roles/bigquery.user`.
+   - for gcs bucket we need `storage.buckets.get,storage.objects.list,storage.objects.create` if you have custom role you can use it, if not the only role which has all those permissions is `roles/storage.admin`
+
 ### Backup Process
 
 1. **Dataset Discovery**: If no specific tables are provided, the service discovers all datasets in the project (excluding the snapshot dataset).

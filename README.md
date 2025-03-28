@@ -10,7 +10,7 @@
 I built this open source solution to automate BigQuery backups and restores. It handles multiple formats, supports threading for better performance and scales well. You can backup entire datasets or specific tables export to common formats like Avro, CSV, Parquet or JSON and restore data exactly when you need it
 ## Architecture Overview
 
-![BigQuery Backup and Restore Architecture](doc/bigquery-backup-and-restore-diagram.png)
+![BigQuery Backup and Restore Architecture](./doc/bigquery-backup-and-restore-diagram.png)
 
 ### How It Works
 
@@ -158,7 +158,14 @@ Although there are a lot more choices in request JSON files, I only use the mini
    # Run the restore
    ./scripts/action.sh restore ./scripts/examples/restore_request_minimal.json DEBUG
    ```
-   
+
+## Documentation
+
+For detailed information about the application, please see:
+- [Configuration Guide](./doc/api-doc.md) - Detailed explanation of all JSON fields and Application logic
+- [Project Setup Details](./doc/setup-guide.md) - How This is project was set up. This is rather for repo maintainers but you are welcome to read if you want to understand how I have configured it.
+
+
 ## Contributing
 
 We welcome your contributions! Please take a look at our [contribution guidelines](CONTRIBUTING.md) first.
