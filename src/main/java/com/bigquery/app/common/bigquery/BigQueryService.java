@@ -137,7 +137,10 @@ public class BigQueryService {
                     .setFieldDelimiter(fieldDelimiter)
                     .build());
             case "JSON" -> configBuilder.setFormatOptions(FormatOptions.json());
-            case "AVRO" -> configBuilder.setFormatOptions(FormatOptions.avro());
+            case "AVRO" ->  {
+                configBuilder.setFormatOptions(FormatOptions.avro());
+                configBuilder.setUseAvroLogicalTypes(true);
+            }
             case "PARQUET" -> configBuilder.setFormatOptions(FormatOptions.parquet());
             default -> throw new ValidationException("Unsupported format: " + format);
         }
