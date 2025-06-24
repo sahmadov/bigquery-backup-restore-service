@@ -37,7 +37,7 @@ To use the image you must push it to your Google Artifact Registry after pulling
 ### Prerequisites
 
 Before starting, ensure you have
-1. Created your own Artifact Registry for pushing images. This is because you might anyway need to have image in your own gcp project.
+1. Created your own Artifact Registry(Docker) for pushing images. This is because you might anyway need to have image in your own gcp project.
 2. Create a Cloud Storage bucket for saving backups. This will be later used in your json http requests to tell our service where to save backups.
 
 #### Step 1: Google Cloud Authentication
